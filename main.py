@@ -32,7 +32,7 @@ def main():
 
     # Sort the similarity and then get the top 3 results and send them to the prompt as context
     top_3_results = df.sort_values("similarities", ascending=False).head(3)
-    print(top_3_results)
+    print(top_3_results["text"])
 
     context: list[str] = []
     for i, row in top_3_results.iterrows():
@@ -40,6 +40,11 @@ def main():
 
     # Create the final context to append to the message
     context: str = "\n".join(context)
+
+    # Create final prompt
+    final_prompt: str = f'Use the following passages to answer the query: "{user_question}"\n\nContext:\n{context}'
+
+    print(final_prompt)
 
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
@@ -50,7 +55,7 @@ def main():
             },
             {
                 "role": "user",
-                "content": f'Use the following passages to answer the query: "{user_question}"\n\nContext:\n{context}',
+                "content": final_prompt,
             },
         ],
     )["choices"][0]["message"]["content"]
