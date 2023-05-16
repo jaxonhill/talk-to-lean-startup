@@ -9,17 +9,23 @@ class PDF:
         self.file_path: str = file_path
         self.pdf_obj: PdfReader = PdfReader(self.file_path)  # Init PDF reader
         self.pages: list[PageObject] = self.pdf_obj.pages[start_page_num:end_page_num]
+        self.clean_pages: list[str] = self.__create_clean_pages_text()
+
+    def __create_clean_pages_text(self):
+        pages_words_list: list[list[str]] = self.__split_pages_into_words_array()
+        return list(map(lambda word_list: " ".join(word_list), pages_words_list))
+
+    def __split_pages_into_words_array(self):
+        # Split the pages into "word" arrays for each page (maybe be slightly inaccurate due to PDF)
+        return list(map(lambda p: p.extract_text().split(), self.pages))
 
     def print_approximations(self):
-        # Split the pages into "word" arrays for each page (maybe be slightly inaccurate due to PDF)
-        pages_split_by_words: list[list[str]] = list(
-            map(lambda p: p.extract_text().split(), self.pages)
-        )
+        pages_words_list: list[list[str]] = self.__split_pages_into_words_array()
 
         # Count the total words in the pages
         total_word_count: int = 0
 
-        for arr_of_words in pages_split_by_words:
+        for arr_of_words in pages_words_list:
             total_word_count += len(arr_of_words)
 
         # 100 tokens ~= 75 words
